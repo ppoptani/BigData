@@ -1,0 +1,20 @@
+val fi = sc.textFile("path")
+val ran = 88.0 to 106.0 by 4.5
+val grp = ran.sliding(2).toList
+val grps = grp.map(i => ((i(0),i(1)))).zipWithIndex
+val a = fi.map(i => i+","+checkGroup(i))
+a.saveAsTextFile("opath")
+def checkGroup(s : String) = {
+	val arr = s.split(",")(4).toDouble
+	val ans =checkNumber(arr)
+	ans.toString
+}
+def checkNumber(d : Double) = {
+	val num = grps.map(i => checkBetween(d, i._1._1, i._1._2, i._2))
+	val gp = num.foldLeft(0.0)(_+_)
+	gp
+}
+def checkBetween(d: Double, a: Double, b : Double, pos : Double) = {
+	val ans = if(d>a && d<b) pos else 0.0
+	ans
+}

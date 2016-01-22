@@ -1,0 +1,21 @@
+scala> val companyData = sc.textFile("/Users/ukothan/Documents/workspace-assignment/StockMarketAnalysis/BigData/inputFiles/companyListUpdated.csv");
+companyData: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[629] at textFile at <console>:30
+
+scala> companyData.collect()
+res10: Array[String] = Array(AAAP,	Advanced Accelerator Applications S.A.,25.2,9.7209E11,2015,Health Care, AAL,	American Airlines Group  Inc.,42.2,2.66E7,2006,Transportation, AAME,	Atlantic American Corporation,4.69,9.637E10,2006,Finance, AAOI,	Applied Optoelectronics  Inc.,17.96,3.0236E11,2013,Technology, AAON,	AAON  Inc.,24.13,1310000.0,2006,Capital Goods, AAPC,	Atlantic Alliance Partnership Corp.,10.16,1.0554E11,2015,Finance, AAPL,	Apple Inc.,119.3,6.6514E8,1980,Technology, AAVL,	Avalanche Biotechnologies  Inc.,8.71,2.2436E11,2014,Health Care, AAWW,	Atlas Air Worldwide Holdings,40.61,1000000.0,2006,Transportation, AAXJ,	iShares MSCI All Country Asia ex Japan Index Fund,56.45,3190000.0,2006,n/a, ABAC,	Aoxin Tianli Group  Inc.,0.65,2.157E10,2006,Consumer Non-Durables, ABAX,	ABAXIS  Inc...
+scala> val filterData = companyData.map( x=> (x.split(",")(4),x.split(",")(0)))
+filterData: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[630] at map at <console>:32
+
+scala> filterData.collect()
+res11: Array[(String, String)] = Array((2015,AAAP), (2006,AAL), (2006,AAME), (2013,AAOI), (2006,AAON), (2015,AAPC), (1980,AAPL), (2014,AAVL), (2006,AAWW), (2006,AAXJ), (2006,ABAC), (1992,ABAX), (1994,ABCB), (2006,ABCD), (2001,ABCO), (2014,ABCW), (2006,ABDC), (2006,ABEO), (2006,ABEOW), (2013,ABGB), (2006,ABIO), (2006,ABMD), (1999,ABTL), (2015,ABTX), (2006,ABUS), (2014,ABY), (1985,ACAD), (1997,ACAS), (1990,ACAT), (2006,ACBI), (2006,ACET), (2006,ACFC), (2006,ACGL), (2006,ACHC), (2006,ACHN), (2006,ACIW), (2000,ACLS), (2006,ACNB), (2006,ACOR), (2000,ACPW), (2015,ACRS), (2011,ACRX), (2014,ACSF), (2006,ACST), (2006,ACTA), (2006,ACTG), (2005,ACTS), (2006,ACTX), (2006,ACUR), (2006,ACWI), (2006,ACWX), (2006,ACXM), (2015,ADAP), (2006,ADAT), (1986,ADBE), (2013,ADHD), (2006,ADI), (2006,ADMA), (2006,...
+scala> val groupData = filterData.groupByKey()
+groupData: org.apache.spark.rdd.RDD[(String, Iterable[String])] = ShuffledRDD[631] at groupByKey at <console>:34
+
+scala> groupData.take(20)
+res12: Array[(String, Iterable[String])] = Array((2008,CompactBuffer(AGNC, ATAI, BEAT, ERII, FSC, HCCI, IPCM, LOPE)), (2015,CompactBuffer(AAAP, AAPC, ABTX, ACRS, ADAP, ADRO, AIMT, ALRM, APIC, APPF, AQMS, ARWA, ARWAR, ARWAU, ARWAW, ASND, AVGR, AVNU, AXSM, BHAC, BHACR, BHACU, BHACW, BITI, BLPH, BLVD, BLVDU, BLVDW, BNTC, BNTCW, BOJA, BPMC, BUFF, BVXV, BVXVW, BZUN, CAFD, CATB, CBYL, CDRB, CDTX, CERC, CERCW, CERCZ, CFMS, CHEK, CHEKW, CHMA, CLACU, CLCD, CLLS, CNFR, CNLM, CNLMR, CNLMW, COLL, CTMX, CYAD, DMTX, DNAI, DTEA, EACQ, EACQU, EACQW, EAGL, EAGLU, EAGLW, ECAC, ECACR, ECACU, EDGE, ELEC, ELECU, ELECW, ENTL, EQBK, EQFN, ETSY, FENX, FLKS, FNTC, FNTCU, FNTCW, FNWB, FOGO, FORK, GBT, GLBL, GLPG, GPAC, GPACU, GPACW, GPIA, GPIAU, GPIAW, GPP, GRSH, GRSHU, GRSHW, HCAC, HCACU, HCACW, HLG, HRMN, HRMN...
+scala> val sortedRDD = groupData.sortByKey()
+sortedRDD: org.apache.spark.rdd.RDD[(String, Iterable[String])] = ShuffledRDD[634] at sortByKey at <console>:36
+
+scala> sortedRDD.take(20)
+res13: Array[(String, Iterable[String])] = Array((1972,CompactBuffer(ALOG, AMAT, COKE, SHLM)), (1973,CompactBuffer(WDFC)), (1980,CompactBuffer(AAPL, KLAC)), (1981,CompactBuffer(CBRL, CSII, DAIO, DGAS, FONR, SEIC)), (1982,CompactBuffer(CORT, CSPI, EMCI, QSII)), (1983,CompactBuffer(ALOT, AMGN, CAMP, CASY, CTAS, GIGA, HCSG, ISRL, KTCC, PAYX, RELL, SPAN, VALU)), (1984,CompactBuffer(ENZN, IDTI, LRCX, MENT, MGRC, NANO)), (1985,CompactBuffer(ACAD, HTCH, JKHY, LYTS, ROST)), (1986,CompactBuffer(ADBE, AEPI, AMWD, ASTE, CERN, CY, CYTR, DGICB, FISV, HTLD, JJSF, LAKE, LLTC, MRTN, MSFT, NAVG, PTSI, RGEN, SIGM, SKYW, TECD, TROW, VIVO, WERN, XOMA)), (1987,CompactBuffer(CELG, CNBKA, CNMD, CYBE, EEI, FAST, FBNC, ICCC, IIVI, IMKTA, LABL, PLAB, SAFM, XRAY)), (1988,CompactBuffer(ALTR, MXIM, TORM          ))...
+scala> 

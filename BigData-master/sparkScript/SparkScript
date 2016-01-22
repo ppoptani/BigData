@@ -1,0 +1,64 @@
+scala> import com.github.nscala_time.time.Imports._
+import com.github.nscala_time.time.Imports._
+
+scala> import org.joda.time.{DateTime=>JodaDateTime}
+import org.joda.time.{DateTime=>JodaDateTime}
+
+//Read the file
+scala> val inputRDD = sc.textFile("/Users/ukothan/Bigdata_data/ScalaProject/data/stocks/FINL.csv")
+inputRDD: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[1] at textFile at <console>:25
+
+//Remove the header
+scala> val inputRDD1 = inputRDD.filter(!_.equals("Date,Open,High,Low,Close,Volume,Adj Close"))
+inputRDD1: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[2] at filter at <console>:27
+
+// Split into key value pair. Key - Date, Value - line 
+scala> val midRDD1 = inputRDD1.map(i=>((i.split(",")(0)),i))
+midRDD1: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[3] at map at <console>:29
+
+
+scala> val midRDD2 = midRDD1.map(i=>( new DateTime(i._1).getWeekOfWeekyear()+","+new DateTime(i._1).getWeekyear(),i._2.tail ))
+///val midRDD2 = midRDD1.map(i=>( new DateTime(i._1).getWeekOfWeekyear()+","+new DateTime(i._1).getWeekyear(),i._2.split(",").tail)
+midRDD2: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[10] at map at <console>:31
+
+
+scala> val midRDD3 = midRDD2.map(i=>( (new DateTime().withWeekOfWeekyear(i._1.split(",")(0).toInt).withWeekyear(i._1.split(",")(1).toInt)),i._2.split(",").tail.map(_.toDouble)))
+midRDD3: org.apache.spark.rdd.RDD[(org.joda.time.DateTime, Array[Double])] = MapPartitionsRDD[15] at map at <console>:33
+
+scala>  val midRDD4 = midRDD3.reduceByKey((i,j)=> i zip j map {case(a,b)=>a+b})
+midRDD4: org.apache.spark.rdd.RDD[(String, Array[Double])] = ShuffledRDD[17] at reduceByKey at <console>:35
+
+scala> val midRDD5 = midRDD4.map( i=>( i._1,i._2.map{b=>b/5}   ))
+midRDD5: org.apache.spark.rdd.RDD[(String, Array[Double])] = MapPartitionsRDD[18] at map at <console>:37
+
+scala> val midRDD6 = midRDD5.map(i=> ((new DateTime().withWeekOfWeekyear(i._1.split(",")(0).toInt).withWeekyear(i._1.split(",")(1).toInt)), i._2))
+midRDD6: org.apache.spark.rdd.RDD[(org.joda.time.DateTime, Array[Double])] = MapPartitionsRDD[19] at map at <console>:39
+
+scala> val midRDD7 = midRDD6.map(i=> (DateTimeFormat.forPattern("M/d/yy").print(i._1),i._2)
+     | )
+midRDD7: org.apache.spark.rdd.RDD[(String, Array[Double])] = MapPartitionsRDD[20] at map at <console>:41
+
+scala> val intRDD = inputRDD.filter(!_.equals("Date,Open,High,Low,Close,Volume,Adj Close")
+     | )
+intRDD: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[21] at filter at <console>:27
+
+scala> val int2RDD = intRDD.map( i => ( i.split(",")(0),i.split(",",2)(1) )  )
+int2RDD: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[22] at map at <console>:29
+
+scala> val int3RDD = int2RDD.map( i=>( new DateTime(i._1) ,i._2)   )
+int3RDD: org.apache.spark.rdd.RDD[(org.joda.time.DateTime, String)] = MapPartitionsRDD[28] at map at <console>:31
+
+
+scala> val int4RDD = int3RDD.map(i=> ( DateTimeFormat.forPattern("M/d/yy").print(i._1),i._2 ))
+int4RDD: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[29] at map at <console>:33
+
+
+scala> val int5RDD = int4RDD.map(i => (i._1,i._2.split(",")))
+int5RDD: org.apache.spark.rdd.RDD[(String, Array[String])] = MapPartitionsRDD[30] at map at <console>:35
+
+scala> val a1 =midRDD8.intersection(int6RDD)
+scala> val a2 = midRDD8.subtract(a1)
+scala> val finalRDD = int6RDD.union(a2)
+
+
+

@@ -1,0 +1,24 @@
+./mahout trainlogistic --input final.csv --output model --target action --predictors Open Close High --types numeric --features 20 --passes 100 --rate 50 --categories 2
+
+Running on hadoop, using /usr/local/Cellar/hadoop/2.7.1/libexec/bin/hadoop and HADOOP_CONF_DIR=
+MAHOUT-JOB: /Users/ukothan/Downloads/apache-mahout-distribution-0.11.1/mahout-examples-0.11.1-job.jar
+20
+action ~ 
+37.394*Close + -62.892*High + 1.262*Intercept Term + 25.943*Open
+               Close 37.39387
+                High -62.89185
+      Intercept Term 1.26236
+                Open 25.94310
+    0.000000000    25.943097594   -62.891845163     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     0.000000000     1.262363586     0.000000000     0.000000000     0.000000000    37.393872554     0.000000000     0.000000000 
+15/12/14 23:02:51 INFO MahoutDriver: Program took 1125 ms (Minutes: 0.01875)
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------
+
+./mahout runlogistic --input final.csv --model model --auc --confusion
+Running on hadoop, using /usr/local/Cellar/hadoop/2.7.1/libexec/bin/hadoop and HADOOP_CONF_DIR=
+MAHOUT-JOB: /Users/ukothan/Downloads/apache-mahout-distribution-0.11.1/mahout-examples-0.11.1-job.jar
+AUC = 0.44
+confusion: [[75.0, 100.0], [99.0, 69.0]]
+entropy: [[NaN, NaN], [-19.6, -22.5]]

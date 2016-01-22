@@ -1,0 +1,45 @@
+import org.apache.spark.mllib.regression.LabeledPoint
+import org.apache.spark.mllib.regression.LinearRegressionModel
+import org.apache.spark.mllib.regression.LinearRegressionWithSGD
+import org.apache.spark.mllib.linalg.Vectors
+
+// Load and parse the data
+scala> val data = sc.textFile("FNL_Fact.csv")
+data: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[48] at textFile at <console>:25
+
+scala> val parsedData = data.map { line =>
+     |   val parts = line.split(",")
+     |   LabeledPoint(parts(0).toDouble, Vectors.dense(parts(1).split(",").map(_.toDouble)))
+     | }.cache()
+parsedData: org.apache.spark.rdd.RDD[org.apache.spark.mllib.regression.LabeledPoint] = MapPartitionsRDD[49] at map at <console>:27
+
+scala> val numIterations = 20
+numIterations: Int = 20
+
+scala> val model = LinearRegressionWithSGD.train(parsedData, numIterations)
+15/12/17 11:15:12 WARN BLAS: Failed to load implementation from: com.github.fommil.netlib.NativeSystemBLAS
+15/12/17 11:15:12 WARN BLAS: Failed to load implementation from: com.github.fommil.netlib.NativeRefBLAS
+model: org.apache.spark.mllib.regression.LinearRegressionModel = org.apache.spark.mllib.regression.LinearRegressionModel: intercept = 0.0, numFeatures = 1
+
+scala> val valuesAndPreds = parsedData.map { point =>
+     |   val prediction = model.predict(point.features)
+     |   (point.label, prediction)
+     | }
+valuesAndPreds: org.apache.spark.rdd.RDD[(Double, Double)] = MapPartitionsRDD[92] at map at <console>:33
+
+scala> val MSE = valuesAndPreds.map{case(v, p) => math.pow((v - p), 2)}.mean()
+MSE: Double = 1.5756706914661312E144
+
+scala> println("training Mean Squared Error = " + MSE)
+training Mean Squared Error = 1.5756706914661312E144
+
+scala> model.save(sc, "myModelPath")
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+
+scala> val sameModel = LinearRegressionModel.load(sc, "myModelPath")
+15/12/17 11:15:56 WARN ParquetRecordReader: Can not initialize counter due to context is not a instance of TaskInputOutputContext, but is org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl
+sameModel: org.apache.spark.mllib.regression.LinearRegressionModel = org.apache.spark.mllib.regression.LinearRegressionModel: intercept = 0.0, numFeatures = 1
+
+scala> 

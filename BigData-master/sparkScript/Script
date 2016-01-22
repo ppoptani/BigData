@@ -1,0 +1,37 @@
+scala> val companyData = sc.textFile("/Users/ukothan/Documents/workspace-assignment/StockMarketAnalysis/BigData/inputFiles/companyListUpdated.csv");
+companyData: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[7] at textFile at <console>:21
+
+scala> val filterData = companyData.map( x=> (x.split(",")(5),x.split(",")(3)))
+filterData: org.apache.spark.rdd.RDD[(String, String)] = MapPartitionsRDD[8] at map at <console>:23
+
+scala> filterData.take(100)
+res7: Array[(String, String)] = Array((Health Care,9.72E+11), (Transportation,2.66E+07), (Finance,9.64E+10), (Technology,3.02E+11), (Capital Goods,1310000), (Finance,1.06E+11), (Technology,6.65E+08), (Health Care,2.24E+11), (Transportation,1000000), (n/a,3190000), (Consumer Non-Durables,2.16E+10), (Capital Goods,1170000), (Finance,1090000), (Consumer Services,2.37E+11), (Consumer Services,2140000), (Finance,4.03E+11), (n/a,1.60E+11), (Health Care,1.37E+11), (Health Care,0), (Consumer Services,8.03E+11), (Health Care,4.76E+10), (Health Care,3450000), (Technology,2.39E+11), (Finance,2.81E+11), (Health Care,2.99E+11), (Public Utilities,1710000), (Health Care,3630000), (n/a,3780000), (Capital Goods,2.80E+11), (Finance,3.47E+11), (Health Care,8.09E+11), (Finance,9.49E+10), (Finance,9070000),...
+scala> val filteredDoubleData = filterData.mapValues(_.toDouble)
+filteredDoubleData: org.apache.spark.rdd.RDD[(String, Double)] = MapPartitionsRDD[9] at mapValues at <console>:25
+
+scala> filteredDoubleData.take(10)
+res8: Array[(String, Double)] = Array((Health Care,9.72E11), (Transportation,2.66E7), (Finance,9.64E10), (Technology,3.02E11), (Capital Goods,1310000.0), (Finance,1.06E11), (Technology,6.65E8), (Health Care,2.24E11), (Transportation,1000000.0), (n/a,3190000.0))
+
+scala> val reduceData = filteredDoubleData.reduceByKey(_+_)
+reduceData: org.apache.spark.rdd.RDD[(String, Double)] = ShuffledRDD[10] at reduceByKey at <console>:27
+
+scala> reduceData.take(5)
+res9: Array[(String, Double)] = Array((Technology,6.465506335E13), (Transportation,8.88918385E12), (Consumer Services,6.330011478E13), (Basic Industries,1.275470832E13), (Consumer Durables,1.536573535E13))
+
+scala> reduceData.take(50)
+res10: Array[(String, Double)] = Array((Technology,6.465506335E13), (Transportation,8.88918385E12), (Consumer Services,6.330011478E13), (Basic Industries,1.275470832E13), (Consumer Durables,1.536573535E13), (2006,0.0), (Miscellaneous,1.660842218E13), (Consumer Non-Durables,1.628304978E13), (Energy,9.00722868E12), (Capital Goods,3.650586871E13), (n/a,3.857457078E13), (Finance,1.0528776349E14), (Public Utilities,1.554773037E13), (2014,0.0), (Health Care,1.1844104613E14), (2007,0.0))
+
+scala> val a = reduceData.map(i => i._1 +","+i._2)
+a: org.apache.spark.rdd.RDD[String] = MapPartitionsRDD[11] at map at <console>:29
+
+scala> a.take(1)
+res11: Array[String] = Array(Technology,6.465506335E13)
+
+scala> a.saveAsTextFile('/Users/ukothan/Documents/workspace-assignment/StockMarketAnalysis/BigData/MarketCapitalTotalSpark')
+<console>:1: error: unclosed character literal
+       a.saveAsTextFile('/Users/ukothan/Documents/workspace-assignment/StockMarketAnalysis/BigData/MarketCapitalTotalSpark')
+                                                                                                                          ^
+
+scala> a.saveAsTextFile("/Users/ukothan/Documents/workspace-assignment/StockMarketAnalysis/BigData/MarketCapitalTotalSpark")
+
+scala> 
